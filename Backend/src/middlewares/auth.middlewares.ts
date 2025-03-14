@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { checkSchema } from 'express-validator'
+import { checkSchema, validationResult } from 'express-validator'
 import { USERS_MESSAGE } from '~/constants/messages'
 
 const checkSchemaRegister = checkSchema({
@@ -70,5 +70,10 @@ const checkSchemaRegister = checkSchema({
 })
 
 export const registerValidator = async (req: Request, res: Response, next: NextFunction) => {
-
+  await checkSchemaRegister.run(req)
+  const errors = validationResult(req)
+  // Lỗi trống => không có lỗi
+  if (errors.isEmpty()) {
+    next()
+  }
 }
