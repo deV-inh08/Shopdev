@@ -23,7 +23,11 @@ class UserServices {
   register(payload: RegisterBody) {
     const user_id = new ObjectId()
     // verify token (JWT) => sign_email_token
+<<<<<<< HEAD
     // const email_verify_token =
+=======
+    // const email_verify_token = 
+>>>>>>> 545267a (signemailverify)
   }
 }
 
