@@ -6,8 +6,37 @@ import { signToken } from '~/utils/jwt'
 import databaseServices from './database.services'
 import { User } from '~/models/schemas/User.schemas'
 import { hassPassword } from '~/utils/crypto'
+import { RefreshToken } from '~/models/schemas/RefreshToken.schema'
 
 class UserServices {
+  // sign access_token: user_id | verify (Unverify)
+  private signAccessToken({ user_id, verify }: { user_id: string; verify: UserVefifyStatus }) {
+    return signToken({
+      payload: {
+        user_id,
+        token_type: TokenType.AccessToken,
+        verify
+      },
+      privateKey: process.env.JWT_SECRET_ACCESS_TOKEN as string,
+      option: {
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN as StringValue
+      }
+    })
+  }
+  // sign refresh_token: user_id | verify (Unverify)
+  private signRefreshToken({ user_id, verify }: { user_id: string; verify: UserVefifyStatus }) {
+    return signToken({
+      payload: {
+        user_id,
+        token_type: TokenType.RefreshToken,
+        verify
+      },
+      privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
+      option: {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN as StringValue
+      }
+    })
+  }
   // sign with: user_id, veerify status ||verify email
   private signEmailVerifyToken({ user_id, verify }: { user_id: string; verify: UserVefifyStatus }) {
     return signToken({
@@ -29,7 +58,6 @@ class UserServices {
       user_id: user_id.toString(),
       verify: UserVefifyStatus.Unverified
     })
-    console.log(email_verify_token)
     // insert user in DB
     databaseServices.users.insertOne(
       new User({
@@ -39,6 +67,24 @@ class UserServices {
         password: hassPassword(payload.password)
       })
     )
+    // generate access_token & refresh token
+    const access_token = await this.signAccessToken({
+      user_id: user_id.toString(),
+      verify: UserVefifyStatus.Unverified
+    })
+    const refresh_token = await this.signRefreshToken({
+      user_id: user_id.toString(),
+      verify: UserVefifyStatus.Unverified
+    })
+    // insert refresh token in DB
+    await databaseServices.refreshTokens.insertOne(
+      new RefreshToken({ user_id: new ObjectId().toString(), token: refresh_token })
+    )
+    // return to controller
+    return {
+      access_token,
+      refresh_token
+    }
   }
 }
 

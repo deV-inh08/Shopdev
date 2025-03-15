@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
 import { checkSchema, validationResult } from 'express-validator'
 import { USERS_MESSAGE } from '~/constants/messages'
+import { HTTP_STATUS } from '~/constants/status'
+import { EntityErrors, ErrorWithStatus } from '~/models/Errors'
 
 const checkSchemaRegister = checkSchema({
-  firs_name: {
+  first_name: {
     isString: {
       errorMessage: USERS_MESSAGE.FIRST_NAME_MUST_BE_A_STRING
     },
@@ -100,4 +102,15 @@ export const registerValidator = async (req: Request, res: Response, next: NextF
   if (errors.isEmpty()) {
     next()
   }
+  // if errors
+  const errorsObject = errors.mapped()
+  const entityErrors = new EntityErrors({ errors: {} })
+  for (const key in errorsObject) {
+    const { msg } = errorsObject[key]
+    if (msg instanceof ErrorWithStatus && msg.status !== HTTP_STATUS.UNPROCESSABLE_ENTITY) {
+      return next(msg)
+    }
+    entityErrors.errors[key] = errorsObject[key]
+  }
+  next(entityErrors)
 }

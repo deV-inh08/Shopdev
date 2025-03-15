@@ -14,7 +14,12 @@ export const USERS_MESSAGE = {
   CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD: 'Confirm password must be the same as password',
 
   LAST_NAME_MUST_BE_A_STRING: 'Last name must be a string',
-  LAST_NAME_MUST_BE_FROM_2_TO_10: 'Last name length must be from 6 to 10',
+  LAST_NAME_MUST_BE_FROM_2_TO_10: 'Last name length must be from 2 to 10',
   FIRST_NAME_MUST_BE_A_STRING: 'First name must be a string',
-  FIRST_NAME_MUST_BE_FROM_2_TO_10: 'First name length must be from 6 to 10',
+  FIRST_NAME_MUST_BE_FROM_2_TO_10: 'First name length must be from 2 to 10',
+
+  REGISTER_SUCCESS: 'Register successfully',
+  LOGIN_SUCCESS: 'Login successfully',
+
+  VALIDATION_ERROR: 'Validation error'
 } as const

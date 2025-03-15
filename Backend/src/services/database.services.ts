@@ -1,5 +1,6 @@
 import { Collection, Db, MongoClient } from 'mongodb'
 import { envConfig } from '~/constants/config'
+import { RefreshTokenType } from '~/models/schemas/RefreshToken.schema'
 import { UserType } from '~/models/schemas/User.schemas'
 
 const uri = `mongodb+srv://${envConfig.dbUserName}:${envConfig.dbPassword}@shopdev.8i1jp.mongodb.net/?retryWrites=true&w=majority&appName=Shopdev`
@@ -24,6 +25,11 @@ class DatabaseServices {
   // create collection 'User'
   get users(): Collection<UserType> {
     return this.db.collection(process.env.DB_USERS_COLLECTION as string)
+  }
+
+  // create collection refresh_token
+  get refreshTokens(): Collection<RefreshTokenType> {
+    return this.db.collection(process.env.DB_REFRESH_TOKEN_COLLECTION as string)
   }
 }
 

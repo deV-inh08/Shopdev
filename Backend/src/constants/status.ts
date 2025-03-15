@@ -1,4 +1,4 @@
-export const STATUS = {
+export const HTTP_STATUS = {
   OK: 200,
   CONTINUE: 100,
   GATEWAY_TIMEOUT: 504,
