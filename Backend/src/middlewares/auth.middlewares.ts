@@ -3,6 +3,30 @@ import { checkSchema, validationResult } from 'express-validator'
 import { USERS_MESSAGE } from '~/constants/messages'
 
 const checkSchemaRegister = checkSchema({
+  firs_name: {
+    isString: {
+      errorMessage: USERS_MESSAGE.FIRST_NAME_MUST_BE_A_STRING
+    },
+    isLength: {
+      options: {
+        min: 2,
+        max: 10
+      },
+      errorMessage: USERS_MESSAGE.FIRST_NAME_MUST_BE_FROM_2_TO_10
+    }
+  },
+  last_name: {
+    isString: {
+      errorMessage: USERS_MESSAGE.LAST_NAME_MUST_BE_A_STRING
+    },
+    isLength: {
+      options: {
+        min: 2,
+        max: 10
+      },
+      errorMessage: USERS_MESSAGE.LAST_NAME_MUST_BE_FROM_2_TO_10
+    }
+  },
   email: {
     isEmail: {
       errorMessage: USERS_MESSAGE.EMAIL_IS_INVALID
