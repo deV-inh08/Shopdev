@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { loginController, registerController } from '~/controllers/auth.controllers'
 import { loginValidator, registerValidator } from '~/middlewares/auth.middlewares'
+import { wrapRequestHandler } from '~/utils/handler'
 
 const authRouter = Router()
 
@@ -16,7 +17,7 @@ Body:
   confirm_password: string
 }
 */
-authRouter.post('/register', registerValidator, registerController)
+authRouter.post('/register', registerValidator, wrapRequestHandler(registerController))
 
 /**
  * Login account
@@ -28,9 +29,6 @@ authRouter.post('/register', registerValidator, registerController)
  *  password: string
  * }
  */
-authRouter.post('/login', loginValidator, loginController)
-// authRouter.get('/login', (req, res) => {
-//   res.send('<h1>Hello1</h1>')
-// })
+authRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
 
 export default authRouter

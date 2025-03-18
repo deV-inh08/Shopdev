@@ -3,6 +3,7 @@ import { checkSchema, validationResult } from 'express-validator'
 import { USERS_MESSAGE } from '~/constants/messages'
 import { HTTP_STATUS } from '~/constants/status'
 import { EntityErrors, ErrorWithStatus } from '~/models/Errors'
+import userServices from '~/services/user.services'
 
 // check schema register
 const checkSchemaRegister = checkSchema({
@@ -37,7 +38,17 @@ const checkSchemaRegister = checkSchema({
     isEmail: {
       errorMessage: USERS_MESSAGE.EMAIL_IS_INVALID
     },
-    trim: true
+    trim: true,
+    custom: {
+      options: async (value: string) => {
+        const isExitsEmail = await userServices.checkEmailExits(value)
+        // if email is exist
+        if (isExitsEmail) {
+          return Promise.reject(USERS_MESSAGE.EMAIL_ALREADY_EXIST)
+        }
+        return true
+      }
+    }
   },
   // password
   password: {
@@ -104,6 +115,7 @@ const checkSchemaRegister = checkSchema({
 export const registerValidator = async (req: Request, res: Response, next: NextFunction) => {
   await checkSchemaRegister.run(req)
   const errors = validationResult(req)
+  console.log(errors)
   // Lỗi trống => không có lỗi
   if (errors.isEmpty()) {
     next()
@@ -118,7 +130,7 @@ export const registerValidator = async (req: Request, res: Response, next: NextF
       }
       entityErrors.errors[key] = errorsObject[key]
     }
-    next(entityErrors)
+    res.json(entityErrors)
   }
 }
 
@@ -158,12 +170,20 @@ const checkSchemaLogin = checkSchema({
 })
 // Login validator
 export const loginValidator = async (req: Request, res: Response, next: NextFunction) => {
-  const result = await checkSchemaLogin.run(req)
+  await checkSchemaLogin.run(req)
   const errors = validationResult(req)
   if (errors.isEmpty()) {
     next()
   } else {
     const errorsObject = errors.mapped()
-    console.log(errorsObject)
+    const entityErrors = new EntityErrors({ errors: {} })
+    for (const key in errorsObject) {
+      const { msg } = errorsObject[key]
+      if (msg instanceof ErrorWithStatus && msg.status !== HTTP_STATUS.UNPROCESSABLE_ENTITY) {
+        return next(msg)
+      }
+      entityErrors.errors[key] = errorsObject[key]
+    }
+    next(entityErrors)
   }
 }

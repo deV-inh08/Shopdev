@@ -109,6 +109,13 @@ class UserServices {
       refresh_token
     }
   }
+
+  async checkEmailExits(email: string) {
+    const user = await databaseServices.users.findOne({
+      email
+    })
+    return Boolean(user)
+  }
 }
 
 const userServices = new UserServices()

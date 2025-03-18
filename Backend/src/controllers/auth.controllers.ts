@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
+import { ParamsDictionary } from 'express-serve-static-core'
 import { UserVefifyStatus } from '~/constants/enums'
 import { USERS_MESSAGE } from '~/constants/messages'
 import { HTTP_STATUS } from '~/constants/status'
