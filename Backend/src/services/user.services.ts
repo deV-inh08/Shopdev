@@ -59,7 +59,7 @@ class UserServices {
       verify: UserVefifyStatus.Unverified
     })
     // insert user in DB
-    databaseServices.users.insertOne(
+    await databaseServices.users.insertOne(
       new User({
         ...payload,
         _id: user_id,
@@ -81,6 +81,29 @@ class UserServices {
       new RefreshToken({ user_id: new ObjectId().toString(), token: refresh_token })
     )
     // return to controller
+    return {
+      access_token,
+      refresh_token
+    }
+  }
+
+  async login({ _id, verify }: { _id: string; verify: UserVefifyStatus }) {
+    // generate new access_token and refresh_token
+    const access_token = await this.signAccessToken({
+      user_id: _id.toString(),
+      verify: verify
+    })
+    const refresh_token = await this.signRefreshToken({
+      user_id: _id.toString(),
+      verify: verify
+    })
+    // insert refresh token in DB
+    await databaseServices.refreshTokens.insertOne(
+      new RefreshToken({
+        user_id: new ObjectId(_id).toString(),
+        token: refresh_token
+      })
+    )
     return {
       access_token,
       refresh_token

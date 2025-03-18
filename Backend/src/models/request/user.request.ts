@@ -5,3 +5,5 @@ export interface RegisterBody {
   password: string
   confirm_password: string
 }
+
+export type LoginBody = Pick<RegisterBody, 'email' | 'password'>
