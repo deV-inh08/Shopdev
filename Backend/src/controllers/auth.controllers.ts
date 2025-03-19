@@ -3,7 +3,6 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { UserVefifyStatus } from '~/constants/enums'
 import { USERS_MESSAGE } from '~/constants/messages'
 import { HTTP_STATUS } from '~/constants/status'
-import { errorResponse, ErrorWithStatus } from '~/models/Errors'
 import { RegisterBody, LoginBody } from '~/models/request/user.request'
 import databaseServices from '~/services/database.services'
 import userServices from '~/services/user.services'
@@ -17,9 +16,9 @@ export const registerController = async (req: Request<ParamsDictionary, any, Reg
       message: USERS_MESSAGE.REGISTER_SUCCESS,
       data: result
     })
-  } catch (error) {
+  } catch (error: any) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      error: error instanceof Error ? error.message : 'Đăng ký thất bại'
+      error: error.message
     })
   }
 }
@@ -31,7 +30,9 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginB
     const { email, password } = req.body
     const user = await databaseServices.users.findOne({ email: email, password: hassPassword(password) })
     if (!user) {
-      throw new ErrorWithStatus({ error: 'Email hoặc password không đúng', status: HTTP_STATUS.UNAUTHORIZED })
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        error: 'Email hoặc password không đúng'
+      })
     } else {
       const { _id } = user
       const result = await userServices.login({ _id: _id.toString(), verify: UserVefifyStatus.Verified })
@@ -41,8 +42,6 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginB
       })
     }
   } catch (error: unknown) {
-    if (error instanceof ErrorWithStatus) {
-      errorResponse(res, error)
-    }
+    console.log(error)
   }
 }

@@ -110,7 +110,7 @@ class UserServices {
     }
   }
 
-  async checkEmailExits(email: string) {
+  async checkEmailExits(email: string): Promise<boolean> {
     const user = await databaseServices.users.findOne({
       email
     })
