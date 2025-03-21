@@ -153,6 +153,7 @@ export const accessTokenValidator = validate(
         options: async (value: string, { req }) => {
           const access_token = value.split(' ')[1]
           if (!access_token) {
+            // throw Error
             throw new ErrorWithStatus({
               message: USERS_MESSAGE.ACCESS_TOKEN_IS_REQUIRED,
               status: HTTP_STATUS.UNAUTHORIZED
@@ -163,7 +164,7 @@ export const accessTokenValidator = validate(
             token: access_token,
             secretOrPublicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
           })
-            // assign to request
+            // assign decoded to request, 
             ; (req as Request).decoded_authorization = decoded_authorization
           return true
         }
@@ -171,5 +172,22 @@ export const accessTokenValidator = validate(
     }
   })
 )
+
+// validator refresh_token
+export const refreshTokenValidator = validate(checkSchema({
+  refresh_token: {
+    trim: true,
+    custom: {
+      options: async (value: string, { req }) => {
+        if (!value) {
+          throw new ErrorWithStatus({
+            status: HTTP_STATUS.UNAUTHORIZED,
+            message: USERS_MESSAGE.REFRESH_TOKEN_IS_REQUIRED
+          })
+        }
+      }
+    }
+  }
+}))
 
 export { registerValidator, loginValidator }
