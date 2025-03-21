@@ -134,4 +134,5 @@ const loginValidator = validate(
   }, ['body'])
 )
 
+
 export { registerValidator, loginValidator }

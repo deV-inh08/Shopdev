@@ -31,4 +31,14 @@ authRouter.post('/register', registerValidator, wrapRequestHandler(registerContr
  */
 authRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
 
+/**
+ * Logout Account
+ * Path: /logout
+ * Method: POST
+ * Body: {
+ * access_token: string
+ * }
+ */
+
+
 export default authRouter

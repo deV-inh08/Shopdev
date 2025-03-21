@@ -21,6 +21,14 @@ class DatabaseServices {
       throw error
     }
   }
+  async disconnect() {
+    try {
+      await this.client.close()
+      console.log('Disconnect MongoDB')
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
 
   // create collection 'User'
   get users(): Collection<UserType> {

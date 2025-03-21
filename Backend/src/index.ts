@@ -14,6 +14,10 @@ app.use('/auth', authRouter)
 
 // connect database
 databaseServices.connect().catch(console.dir)
+process.on('SIGINT', async () => {
+  await databaseServices.disconnect()
+  process.exit(0)
+})
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running at http://localhost:${process.env.PORT}`)
