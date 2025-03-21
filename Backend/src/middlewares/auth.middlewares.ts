@@ -1,7 +1,11 @@
+import { Request } from 'express'
 import { checkSchema, validationResult } from 'express-validator'
 import { ParamSchema } from 'express-validator/lib/middlewares/schema'
 import { USERS_MESSAGE } from '~/constants/messages'
+import { HTTP_STATUS } from '~/constants/status'
+import { ErrorWithStatus } from '~/models/Errors'
 import userServices from '~/services/user.services'
+import { verifyToken } from '~/utils/jwt'
 import validate from '~/utils/validate'
 
 // declare schema
@@ -121,18 +125,51 @@ const registerValidator = validate(
       // password
       password: passwordSchema,
       // confirm password
-      confirm_password: confirmPasswordSchema,
-    }, ['body']
+      confirm_password: confirmPasswordSchema
+    },
+    ['body']
   )
 )
 
 // schema Login && Validate Login
 const loginValidator = validate(
-  checkSchema({
-    email: emailSchema,
-    password: passwordSchema
-  }, ['body'])
+  checkSchema(
+    {
+      email: emailSchema,
+      password: passwordSchema
+    },
+    ['body']
+  )
 )
 
+// validate access_token
+export const accessTokenValidator = validate(
+  checkSchema({
+    Authorization: {
+      notEmpty: {
+        errorMessage: USERS_MESSAGE.ACCESS_TOKEN_IS_REQUIRED
+      },
+      custom: {
+        options: async (value: string, { req }) => {
+          const access_token = value.split(' ')[1]
+          if (!access_token) {
+            throw new ErrorWithStatus({
+              message: USERS_MESSAGE.ACCESS_TOKEN_IS_REQUIRED,
+              status: HTTP_STATUS.UNAUTHORIZED
+            })
+          }
+          // verify access_token
+          const decoded_authorization = await verifyToken({
+            token: access_token,
+            secretOrPublicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
+          })
+            // assign to request
+            ; (req as Request).decoded_authorization = decoded_authorization
+          return true
+        }
+      }
+    }
+  })
+)
 
 export { registerValidator, loginValidator }

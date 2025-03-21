@@ -8,7 +8,7 @@ const uri = `mongodb+srv://${envConfig.dbUserName}:${envConfig.dbPassword}@shopd
 class DatabaseServices {
   private client: MongoClient
   private db: Db
-  constructor() {
+  constructor(uri: string) {
     this.client = new MongoClient(uri)
     this.db = this.client.db(envConfig.dbName)
   }
@@ -41,5 +41,5 @@ class DatabaseServices {
   }
 }
 
-const databaseServices = new DatabaseServices()
+const databaseServices = new DatabaseServices(uri)
 export default databaseServices

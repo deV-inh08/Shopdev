@@ -39,6 +39,5 @@ authRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
  * access_token: string
  * }
  */
-
-
+authRouter.post('/logout')
 export default authRouter
