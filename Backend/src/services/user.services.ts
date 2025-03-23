@@ -78,7 +78,7 @@ class UserServices {
     })
     // insert refresh token in DB
     await databaseServices.refreshTokens.insertOne(
-      new RefreshToken({ user_id: new ObjectId().toString(), token: refresh_token })
+      new RefreshToken({ user_id, token: refresh_token })
     )
     // return to controller
     return {
@@ -100,7 +100,7 @@ class UserServices {
     // insert refresh token in DB
     await databaseServices.refreshTokens.insertOne(
       new RefreshToken({
-        user_id: new ObjectId(_id).toString(),
+        user_id: new ObjectId(_id),
         token: refresh_token
       })
     )

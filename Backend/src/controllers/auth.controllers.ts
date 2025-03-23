@@ -31,12 +31,12 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginB
     const user = await databaseServices.users.findOne({ email: email, password: hassPassword(password) })
     if (!user) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        error: 'Email hoặc password không đúng'
+        error: USERS_MESSAGE.EMAIL_DOSE_NOT_EXIST
       })
     } else {
       const { _id } = user
       const result = await userServices.login({ _id: _id.toString(), verify: UserVefifyStatus.Verified })
-      res.status(200).json({
+      res.status(HTTP_STATUS.OK).json({
         message: USERS_MESSAGE.LOGIN_SUCCESS,
         data: result
       })

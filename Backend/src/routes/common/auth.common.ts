@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { loginController, registerController } from '~/controllers/auth.controllers'
-import { loginValidator, registerValidator } from '~/middlewares/auth.middlewares'
+import { accessTokenValidator, loginValidator, registerValidator, refreshTokenValidator } from '~/middlewares/auth.middlewares'
 import { wrapRequestHandler } from '~/utils/handler'
 
 const authRouter = Router()
@@ -39,5 +39,5 @@ authRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
  * access_token: string
  * }
  */
-authRouter.post('/logout')
+authRouter.post('/logout', accessTokenValidator, refreshTokenValidator)
 export default authRouter
