@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb'
 import type { StringValue } from 'ms'
 import { TokenType, UserVefifyStatus } from '~/constants/enums'
-import { RegisterBody } from '~/models/request/user.request'
+import { RegisterReqBody } from '~/models/request/user.request'
 import { signToken } from '~/utils/jwt'
 import databaseServices from './database.services'
 import { User } from '~/models/schemas/User.schemas'
@@ -52,7 +52,7 @@ class UserServices {
     })
   }
 
-  async register(payload: RegisterBody) {
+  async register(payload: RegisterReqBody) {
     const user_id = new ObjectId()
     const email_verify_token = await this.signEmailVerifyToken({
       user_id: user_id.toString(),
@@ -77,9 +77,7 @@ class UserServices {
       verify: UserVefifyStatus.Unverified
     })
     // insert refresh token in DB
-    await databaseServices.refreshTokens.insertOne(
-      new RefreshToken({ user_id, token: refresh_token })
-    )
+    await databaseServices.refreshTokens.insertOne(new RefreshToken({ user_id, token: refresh_token }))
     // return to controller
     return {
       access_token,
@@ -115,6 +113,12 @@ class UserServices {
       email
     })
     return Boolean(user)
+  }
+
+  // delete refresh_token in DB
+  async logOut(refresh_token: string) {
+    const result = await databaseServices.refreshTokens.deleteOne({ token: refresh_token })
+    return result
   }
 }
 

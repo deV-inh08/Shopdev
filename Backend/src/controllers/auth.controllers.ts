@@ -3,13 +3,13 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { UserVefifyStatus } from '~/constants/enums'
 import { USERS_MESSAGE } from '~/constants/messages'
 import { HTTP_STATUS } from '~/constants/status'
-import { RegisterBody, LoginBody } from '~/models/request/user.request'
+import { RegisterReqBody, LoginReqBody, LogoutReqBody } from '~/models/request/user.request'
 import databaseServices from '~/services/database.services'
 import userServices from '~/services/user.services'
 import { hassPassword } from '~/utils/crypto'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const registerController = async (req: Request<ParamsDictionary, any, RegisterBody>, res: Response) => {
+export const registerController = async (req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response) => {
   try {
     const result = await userServices.register(req.body)
     res.status(HTTP_STATUS.OK).json({
@@ -23,7 +23,7 @@ export const registerController = async (req: Request<ParamsDictionary, any, Reg
   }
 }
 
-export const loginController = async (req: Request<ParamsDictionary, any, LoginBody>, res: Response) => {
+export const loginController = async (req: Request<ParamsDictionary, any, LoginReqBody>, res: Response) => {
   try {
     // find email in DB, if it have => success ortherwise failed
     // compare password user post to server, compare it in DB
@@ -44,4 +44,13 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginB
   } catch (error: unknown) {
     console.log(error)
   }
+}
+
+export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
+  const { refresh_token } = req.body
+  const result = await userServices.logOut(refresh_token)
+  return res.json({
+    message: USERS_MESSAGE.REFRESH_TOKEN_DELETE_SUCCESS,
+    data: result
+  })
 }

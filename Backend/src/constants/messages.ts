@@ -29,6 +29,6 @@ export const USERS_MESSAGE = {
 
   ACCESS_TOKEN_IS_REQUIRED: 'Access token is required',
   REFRESH_TOKEN_IS_REQUIRED: 'Refresh token is required',
-
+  REFRESH_TOKEN_DELETE_SUCCESS: 'Refresh token delete success',
   USED_REFRESH_TOKEN_OR_NOT_EXITS: 'Used refresh token or not exits'
 } as const

@@ -5,6 +5,7 @@ interface UserType {
   _id?: ObjectId
   first_name: string
   last_name: string
+  roles: string
   email: string
   phone_number?: string
   password: string
@@ -23,6 +24,7 @@ class User {
   _id?: ObjectId
   first_name: string
   last_name: string
+  roles: string
   email: string
   phone_number: string
   password: string
@@ -39,6 +41,7 @@ class User {
     this._id = user._id || new ObjectId()
     this.first_name = user.first_name || ''
     this.last_name = user.last_name || ''
+    this.roles = user.roles || 'user'
     this.email = user.email || ''
     this.password = user.password || ''
     this.country = user.country || ''

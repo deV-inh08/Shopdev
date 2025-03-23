@@ -1,7 +1,7 @@
-import { JwtPayload } from "jsonwebtoken"
-import { TokenType, UserVefifyStatus } from "~/constants/enums"
+import { JwtPayload } from 'jsonwebtoken'
+import { TokenType, UserVefifyStatus } from '~/constants/enums'
 
-export interface RegisterBody {
+export interface RegisterReqBody {
   first_name: string
   last_name: string
   email: string
@@ -9,14 +9,13 @@ export interface RegisterBody {
   confirm_password: string
 }
 
-export type LoginBody = Pick<RegisterBody, 'email' | 'password'>
+export type LoginReqBody = Pick<RegisterReqBody, 'email' | 'password'>
 
+export type LogoutReqBody = {
+  refresh_token: string
+}
 export interface TokenPayload extends JwtPayload {
   user_id: string
   token__type: TokenType
   verify: UserVefifyStatus
-}
-
-export interface LogOutRequestBody {
-  refresh_token: string
 }

@@ -26,7 +26,7 @@ export const verifyToken = async ({ token, secretOrPublicKey }: { token: string;
     jwt.verify(token, secretOrPublicKey, (error, decoded) => {
       if (error) {
         throw reject(error)
-      };
+      }
       resolve(decoded as TokenPayload)
     })
   })

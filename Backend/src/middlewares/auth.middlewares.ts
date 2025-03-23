@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { checkSchema, validationResult } from 'express-validator'
+import { checkSchema } from 'express-validator'
 import { ParamSchema } from 'express-validator/lib/middlewares/schema'
 import { JsonWebTokenError } from 'jsonwebtoken'
 import { USERS_MESSAGE } from '~/constants/messages'
@@ -171,26 +171,28 @@ const loginValidator = validate(
 
 // validate access_token
 const accessTokenValidator = validate(
-  checkSchema({
-    /** Authorization trong HTTP headers chứa thông tin xác thực người dùng.
-     *  Thông thường, nó có dạng: Bearer <access_token>
-     */
-    Authorization: {
-      notEmpty: {
-        errorMessage: USERS_MESSAGE.ACCESS_TOKEN_IS_REQUIRED
-      },
-      custom: {
-        options: async (value: string, { req }) => {
-          const access_token = value.split(' ')[1]
-          if (!access_token) {
-            // throw Error
-            throw new ErrorWithStatus({
-              message: USERS_MESSAGE.ACCESS_TOKEN_IS_REQUIRED,
-              status: HTTP_STATUS.UNAUTHORIZED
-            })
-          }
-          // verify access_token
-          /**
+  checkSchema(
+    {
+      /** Authorization trong HTTP headers chứa thông tin xác thực người dùng.
+       *  Thông thường, nó có dạng: Bearer <access_token>
+       */
+      Authorization: {
+        notEmpty: {
+          errorMessage: USERS_MESSAGE.ACCESS_TOKEN_IS_REQUIRED
+        },
+        custom: {
+          options: async (value: string, { req }) => {
+            const access_token = value.split(' ')[1]
+            if (!access_token) {
+              // throw Error
+              console.log('a')
+              throw new ErrorWithStatus({
+                message: USERS_MESSAGE.ACCESS_TOKEN_IS_REQUIRED,
+                status: HTTP_STATUS.UNAUTHORIZED
+              })
+            }
+            // verify access_token
+            /**
            * decoded_authorization là thông tin giải mã từ access_token, chứa các dữ liệu quan trọng như:
            * {
               "id": "12345",
@@ -200,25 +202,26 @@ const accessTokenValidator = validate(
               "exp": 1711336163
             }
            */
-          const decoded_authorization = await verifyToken({
-            token: access_token,
-            secretOrPublicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
-          })
-            /** assign decoded to request
-            * Tại sao phải gán vào request (req.decoded_authorization)?
-            * Trong nhiều API (ví dụ: /user/profile, /cart), backend cần biết người dùng là ai.
-            * Nếu middleware (như accessTokenValidator) đã decode và gán req.decoded_authorization,
-            * các route handler phía sau có thể dùng ngay mà không cần giải mã lại access_token.
-            * Tranh verifyToken lai nhieu lan
-            */
-            ; (req as Request).decoded_authorization = decoded_authorization
-          return true
+            const decoded_authorization = await verifyToken({
+              token: access_token,
+              secretOrPublicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
+            })
+              /** assign decoded to request
+               * Tại sao phải gán vào request (req.decoded_authorization)?
+               * Trong nhiều API (ví dụ: /user/profile, /cart), backend cần biết người dùng là ai.
+               * Nếu middleware (như accessTokenValidator) đã decode và gán req.decoded_authorization,
+               * các route handler phía sau có thể dùng ngay mà không cần giải mã lại access_token.
+               * Tranh verifyToken lai nhieu lan
+               */
+              ; (req as Request).decoded_authorization = decoded_authorization
+            return true
+          }
         }
       }
-    }
-  })
+    },
+    ['headers']
+  )
 )
-
 
 /**
  * Why validate refresh_token:
@@ -228,46 +231,51 @@ const accessTokenValidator = validate(
  * */
 
 // validator refresh_token
-const refreshTokenValidator = validate(checkSchema({
-  refresh_token: {
-    trim: true,
-    custom: {
-      options: async (value: string, { req }) => {
-        if (!value) {
-          throw new ErrorWithStatus({
-            status: HTTP_STATUS.UNAUTHORIZED,
-            message: USERS_MESSAGE.REFRESH_TOKEN_IS_REQUIRED
-          })
-        }
-        try {
-          const [decoded_refresh_token, refresh_token] = await Promise.all([
-            // verify refresh_token
-            verifyToken({ token: value, secretOrPublicKey: process.env.JWT_SECRET_REFRESH_TOKEN as string }),
-            // find refresh_token
-            databaseServices.refreshTokens.findOne({ token: value })
-          ])
-          // have not fresh_token in DB
-          if (!refresh_token && refresh_token === null) {
-            throw new ErrorWithStatus({
-              message: USERS_MESSAGE.USED_REFRESH_TOKEN_OR_NOT_EXITS,
-              status: HTTP_STATUS.UNAUTHORIZED
-            })
+const refreshTokenValidator = validate(
+  checkSchema(
+    {
+      refresh_token: {
+        trim: true,
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!value) {
+              throw new ErrorWithStatus({
+                status: HTTP_STATUS.UNAUTHORIZED,
+                message: USERS_MESSAGE.REFRESH_TOKEN_IS_REQUIRED
+              })
+            }
+            try {
+              const [decoded_refresh_token, refresh_token] = await Promise.all([
+                // verify refresh_token
+                verifyToken({ token: value, secretOrPublicKey: process.env.JWT_SECRET_REFRESH_TOKEN as string }),
+                // find refresh_token
+                databaseServices.refreshTokens.findOne({ token: value })
+              ])
+              // have not fresh_token in DB
+              if (!refresh_token && refresh_token === null) {
+                throw new ErrorWithStatus({
+                  message: USERS_MESSAGE.USED_REFRESH_TOKEN_OR_NOT_EXITS,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              ; (req as Request).decoded_refresh_token = decoded_refresh_token
+            } catch (error) {
+              // Token is error( bị sửa đổi , Token không đúng định dạng, Token đã hết hạn )
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatus({
+                  message: (error as JsonWebTokenError).message,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              throw error
+            }
+            return true
           }
-          ; (req as Request).decoded_refresh_token = decoded_refresh_token
-        } catch (error) {
-          // Token is error( bị sửa đổi , Token không đúng định dạng, Token đã hết hạn )
-          if (error instanceof JsonWebTokenError) {
-            throw new ErrorWithStatus({
-              message: (error as JsonWebTokenError).message,
-              status: HTTP_STATUS.UNAUTHORIZED
-            })
-          }
-          throw error
         }
-        return true
       }
-    }
-  }
-}))
+    },
+    ['body']
+  )
+)
 
 export { registerValidator, loginValidator, accessTokenValidator, refreshTokenValidator }

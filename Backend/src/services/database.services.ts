@@ -39,6 +39,8 @@ class DatabaseServices {
   get refreshTokens(): Collection<RefreshTokenType> {
     return this.db.collection(process.env.DB_REFRESH_TOKEN_COLLECTION as string)
   }
+
+  // create collection products
 }
 
 const databaseServices = new DatabaseServices(uri)
