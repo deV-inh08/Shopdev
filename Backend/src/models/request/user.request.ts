@@ -14,6 +14,10 @@ export type LoginReqBody = Pick<RegisterReqBody, 'email' | 'password'>
 export type LogoutReqBody = {
   refresh_token: string
 }
+
+export type RefreshAccessToken = LogoutReqBody & {
+  refresh_token: string
+}
 export interface TokenPayload extends JwtPayload {
   user_id: string
   token__type: TokenType

@@ -3,7 +3,7 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { UserVefifyStatus } from '~/constants/enums'
 import { USERS_MESSAGE } from '~/constants/messages'
 import { HTTP_STATUS } from '~/constants/status'
-import { RegisterReqBody, LoginReqBody, LogoutReqBody } from '~/models/request/user.request'
+import { RegisterReqBody, LoginReqBody, LogoutReqBody, RefreshAccessToken, TokenPayload } from '~/models/request/user.request'
 import databaseServices from '~/services/database.services'
 import userServices from '~/services/user.services'
 import { hassPassword } from '~/utils/crypto'
@@ -51,6 +51,16 @@ export const logoutController = async (req: Request<ParamsDictionary, any, Logou
   const result = await userServices.logOut(refresh_token)
   return res.json({
     message: USERS_MESSAGE.REFRESH_TOKEN_DELETE_SUCCESS,
+    data: result
+  })
+}
+
+export const refreshTokenController = async (req: Request<ParamsDictionary, any, RefreshAccessToken>, res: Response) => {
+  const { refresh_token } = req.body
+  const { user_id, verify } = req.decoded_refresh_token as TokenPayload
+  const result = await userServices.refreshAccessToken({ refresh_token, user_id, verify })
+  return res.json({
+    message: USERS_MESSAGE.REFRESH_ACCESS_TOKEN_SUCCESS,
     data: result
   })
 }

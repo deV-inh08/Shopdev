@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { loginController, logoutController, registerController } from '~/controllers/auth.controllers'
+import { loginController, logoutController, refreshTokenController, registerController } from '~/controllers/auth.controllers'
 import {
   accessTokenValidator,
   loginValidator,
@@ -46,4 +46,11 @@ authCommonRouter.post('/login', loginValidator, wrapRequestHandler(loginControll
  * }
  */
 authCommonRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapRequestHandler(logoutController))
+
+/**
+ * Refresh (access_token) token
+ * Path: /refresh-access-token
+ * Method: Post
+ */
+authCommonRouter.post('/refresh-access-token', refreshTokenValidator, wrapRequestHandler(refreshTokenController))
 export default authCommonRouter

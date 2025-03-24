@@ -5,7 +5,7 @@ interface UserType {
   _id?: ObjectId
   first_name: string
   last_name: string
-  roles: string
+  roles?: string
   email: string
   phone_number?: string
   password: string
